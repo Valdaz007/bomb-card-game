@@ -52,3 +52,21 @@ class Bomb():
         if len(self._deck) == 1:
             self._deck.add(self._board)
             self._board.init()
+
+
+class Player:
+    def __init__(self) -> None:
+        self._hand = Pile()
+    
+    def getHand(self) -> list:
+        return self._hand
+    
+    def setHand(self, hand:list) -> None:
+        self._hand.init(hand)
+
+    def pick(self, cards:list) -> None:
+        self._hand.add(cards)
+    
+    def play(self, cardIndex:list) -> list:
+        pass #Todo
+
