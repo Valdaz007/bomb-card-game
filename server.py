@@ -1,42 +1,38 @@
 import socket
 from _thread import *
-import sys
 
-server = "192.168.143.194"
-port = 5555
+server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+clients = {}
 
-serve = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+def broadcast(msg):
+    for client in clients.values():
+        client.send(msg)
 
-try:
-    serve.bind((server, port))
-except socket.error as e:
-    str(e)
-
-serve.listen(2)
-print('Waiting for connnection... Server Started')
-
-def client_Thread(conn):
-    conn.send(str.encode("Connected..."))
-    reply = ""
+def client_Msg(client): #! Todo
     while True:
         try:
-            data = conn.recv(1024)
-            reply = data.decode("utf-8")
-
-            if not data:
-                print("Diconnected")
-                break
-            else:
-                print("Recieved: ", reply)
-                print("Send: ", reply)
-            conn.sendall(str.encode(reply))
+            msg = client.recv(1024)
+            broadcast(msg)
         except:
-            break
+            pass #! Todo
+
     print("Lost connection")
-    conn.close()
+    msg.close()
 
-while True:
-    conn, addr = serve.accept()
-    print('Connected to:', addr)
+def main():
+    try:
+        server.bind(("192.168.143.194", 5555))
+    except socket.error as e:
+        str(e)
 
-    start_new_thread(client_Thread, (conn,))
+    server.listen(5)
+    print('Server Started ==> Waiting for connnection...')
+
+    while True:
+        client, addr = server.accept()
+        print(f"Connected To Server: {str(addr)}")
+
+        client.send('id'.encode('ascii'))
+        id = client.recv(1024).decode('ascii')
+
+        clients[id] = client
