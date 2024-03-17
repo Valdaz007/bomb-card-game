@@ -1,21 +1,35 @@
-from bomb.client import *
-from _thread import *
+import socket
+import threading
+from datetime import datetime
 
-client = Client()
+id = datetime.now().strftime('%Y%m%d%H%M%S')
+client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+client.connect(('127.0.0.1', 5555))
 
-def recv():
+def rx():
     while True:
-        msg = client.onRecv()
-        if msg != False:
-            print(msg)
-        else:
+        try:
+            msg = client.recv(1024).decode('ascii')
+            if msg == "id":
+                client.send(id.encode('ascii'))
+            else:
+                print(msg)
+        except:
+            print("An Error Occured!")
+            client.close()
             break
 
-def send():
+def tx():
     while True:
-        msg = f"{client.id}: {input('')}"
-        client.send(msg)
+        try:
+            msg = f"{id}: {input(f'{id}: ')}"
+            client.send(msg.encode('ascii'))
+        except:
+            print(f'Error: ', msg)
 
-if __name__ == "__main__":
-    start_new_thread(recv)
-    start_new_thread(send)
+
+
+rx_thread = threading.Thread(target=rx)
+tx_thread = threading.Thread(target=tx)
+rx_thread.start()
+tx_thread.start()
